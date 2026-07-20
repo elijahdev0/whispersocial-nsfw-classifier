@@ -1,0 +1,25 @@
+services:
+  nsfw-classifier:
+    build: .
+    restart: unless-stopped
+    networks:
+      - dokploy-network
+    labels:
+      - "traefik.docker.network=dokploy-network"
+    environment:
+      - NSFW_MODEL_ID=Marqo/nsfw-image-detection-384
+      - NSFW_THRESHOLD=0.5
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+networks:
+  dokploy-network:
+    external: true
